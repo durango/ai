@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8" />
+  <title>PostgreSQL Column Sorter</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 30px;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: row;
+      gap: 20px;
+    }
+
+    .box {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    textarea {
+      width: 100%;
+      height: 300px;
+      resize: vertical;
+      font-family: monospace;
+      font-size: 14px;
+      padding: 10px;
+      box-sizing: border-box;
+    }
+
+    button {
+      margin-top: 10px;
+      padding: 10px 20px;
+      cursor: pointer;
+    }
+
+    #output {
+      white-space: pre;
+      border: 1px solid #ccc;
+      padding: 10px;
+      overflow: auto;
+      height: 350px;
+      font-family: monospace;
+      font-size: 14px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>PostgreSQL Column Sorter</h1>
+
+  <div class="container">
+    <!-- Input box -->
+    <div class="box">
+      <label for="inputSql"><strong>Paste your CREATE TABLE statement here:</strong></label>
+      <textarea id="inputSql" placeholder="Paste your SQL CREATE TABLE statement here..."></textarea>
+      <button id="convertBtn">Convert</button>
+    </div>
+
+    <!-- Output box -->
+    <div class="box">
+      <label for="output"><strong>Sorted CREATE TABLE statement:</strong></label>
+      <div id="output" tabindex="0"></div>
+    </div>
+  </div>
+
+  <script>
+    /**
+     * Categorize data types to sort by alignment:
+     *  1 => 8-byte
+     *  2 => 4-byte
+     *  3 => 2-byte
+     *  4 => 1-byte
+     *  5 => variable
+     *
+     * Higher alignment columns go first. So we sort ascending by category number
+     * (i.e., category=1 means highest alignment -> placed first).
+     */
+    function getAlignmentCategory(dataType) {
+      // Normalize to lower case for matching
+      const dt = dataType.toLowerCase();
+
+      // Very naive matching. You can adjust or extend as needed.
+      // 8-byte:
+      if (
+        dt.includes("bigint") ||
+        dt.includes("double precision") ||
+        dt.includes("timestamp") ||    // "timestamp without time zone" / "timestamp with time zone"
+        dt.includes("timestamptz") ||
+        dt.includes("time") ||         // "time without time zone"
+        dt.includes("numeric(") ||     // numeric(precision, scale) can be 8 bytes if small precision, but let's assume 8 for demonstration
+        dt.includes("money")
+      ) {
+        return 1;
+      }
+
+      // 4-byte:
+      if (
+        dt.includes("int") ||
+        dt.includes("integer") ||
+        dt.includes("real") ||
+        dt.includes("date")
+      ) {
+        return 2;
+      }
+
+      // 2-byte:
+      if (dt.includes("smallint")) {
+        return 3;
+      }
+
+      // 1-byte:
+      if (dt.includes("bool")) {
+        return 4;
+      }
+
+      // If not matched above, assume variable-length
+      return 5;
+    }
+
+    /**
+     * Attempt to parse a CREATE TABLE statement, reorder columns, and rebuild statement.
+     */
+    function reorderCreateTable(sql) {
+      // Trim and remove trailing semicolon if present
+      sql = sql.trim().replace(/;$/, "");
+
+      // Simple match to find the CREATE TABLE ... ( ... ) part
+      // This is naive: if the statement has complicated structure, it may fail.
+      const createTablePattern = /create\s+table\s+(\S+)\s*\(([\s\S]+)\)/i;
+      const match = sql.match(createTablePattern);
+      if (!match) {
+        return "ERROR: Unable to parse CREATE TABLE statement.\n\nMake sure it follows standard syntax.";
+      }
+
+      const tableName = match[1];
+      let columnsSection = match[2].trim();
+
+      // Remove possible trailing or leading parentheses or spaces
+      columnsSection = columnsSection.replace(/^\(|\)$/g, "").trim();
+
+      // Split columns by commas that are not inside parentheses
+      // For simplicity, let's do a naive split on commas at top level
+      // This might break if your definitions have commas in constraints, etc.
+      let columnLines = [];
+      let current = "";
+      let parenDepth = 0;
+      for (let i = 0; i < columnsSection.length; i++) {
+        const ch = columnsSection[i];
+        if (ch === '(') parenDepth++;
+        if (ch === ')') parenDepth--;
+        if (ch === ',' && parenDepth === 0) {
+          // top-level comma -> new column
+          columnLines.push(current.trim());
+          current = "";
+        } else {
+          current += ch;
+        }
+      }
+      // push the last accumulated line
+      if (current.trim()) {
+        columnLines.push(current.trim());
+      }
+
+      // Determine if a line is a column definition or a table-level constraint
+      // We'll assume it's a column definition if it starts with something that looks like an identifier
+      // followed by a data type. We'll store constraints as-is and not reorder them.
+      let columnDefs = [];
+      let tableConstraints = [];
+      columnLines.forEach(line => {
+        // We'll check if line roughly matches "<identifier> <datatype>"
+        // This is extremely naive—improve if needed.
+        const parts = line.split(/\s+/);
+        const firstWord = parts[0] || "";
+
+        // Heuristic: if first word is "constraint", "primary", "unique", "foreign", etc., treat as table constraint
+        const isConstraint = /^(constraint|primary|unique|foreign|check|exclude)$/i.test(firstWord);
+        if (isConstraint) {
+          tableConstraints.push(line);
+          return;
+        }
+
+        // Otherwise, try to interpret the second word as data type
+        // This won't work perfectly if the second word is "NOT" for "NOT NULL", etc.
+        // We'll do the best we can. We'll assume at least 2 words means col + data type
+        if (parts.length >= 2) {
+          // The second word is probably data type or part of it
+          const dataTypeGuess = parts[1] ? parts.slice(1).join(" ") : "";
+          const alignment = getAlignmentCategory(dataTypeGuess);
+          columnDefs.push({
+            originalLine: line,
+            alignment
+          });
+        } else {
+          // If we can't parse, treat as table constraint
+          tableConstraints.push(line);
+        }
+      });
+
+      // Sort columnDefs by alignment (ascending -> category 1 first => 8-byte, etc.)
+      columnDefs.sort((a, b) => a.alignment - b.alignment);
+
+      // Rebuild the sorted column lines
+      const sortedColumnLines = columnDefs.map(obj => obj.originalLine).concat(tableConstraints);
+
+      // Rebuild the entire CREATE TABLE statement
+      const indent = "  ";
+      const newSql =
+        `CREATE TABLE ${tableName} (\n` +
+        sortedColumnLines.map(line => `${indent}${line}`).join(",\n") +
+        `\n);\n`;
+
+      return newSql;
+    }
+
+    document.getElementById("convertBtn").addEventListener("click", () => {
+      const inputSql = document.getElementById("inputSql").value;
+      const outputDiv = document.getElementById("output");
+
+      if (!inputSql.trim()) {
+        outputDiv.textContent = "Please paste a CREATE TABLE statement.";
+        return;
+      }
+
+      const result = reorderCreateTable(inputSql);
+      outputDiv.textContent = result;
+    });
+  </script>
+
+</body>
+
+</html>
+
