@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unix Permission Converter</title>
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --bg-color: #f9fafb;
+            --card-bg: #ffffff;
+            --text-color: #1f2937;
+            --border-color: #e5e7eb;
+            --success: #10b981;
+            --dark-success: #059669;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.5;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--primary-dark);
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .description {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        textarea {
+            width: 100%;
+            height: 150px;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            resize: vertical;
+            font-family: monospace;
+            margin-bottom: 15px;
+        }
+
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .results {
+            margin-top: 20px;
+        }
+
+        .file-item {
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            margin-bottom: 10px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .file-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .permission-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .permission-group {
+            padding: 10px;
+            border-radius: 4px;
+            background-color: #f3f4f6;
+        }
+
+        .permission-group h4 {
+            margin-top: 0;
+            margin-bottom: 8px;
+            color: var(--primary-dark);
+        }
+
+        .permission-group ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .permission-group li {
+            padding: 3px 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .permission-group li span {
+            margin-left: 8px;
+        }
+
+        .granted {
+            color: var(--success);
+        }
+
+        .denied {
+            color: #ef4444;
+        }
+
+        .check-icon,
+        .x-icon {
+            display: inline-block;
+            width: 18px;
+            text-align: center;
+        }
+
+        .file-type {
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            background-color: #e5e7eb;
+        }
+
+        .numeric-permission {
+            margin-top: 5px;
+            font-family: monospace;
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        .file-name {
+            font-weight: 600;
+            word-break: break-all;
+        }
+
+        .explanation {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f3f4f6;
+            border-radius: 4px;
+        }
+
+        .explanation h3 {
+            margin-top: 0;
+            color: var(--primary-dark);
+        }
+
+        .clear-btn {
+            background-color: #f3f4f6;
+            color: #4b5563;
+            margin-left: 10px;
+        }
+
+        .clear-btn:hover {
+            background-color: #e5e7eb;
+        }
+
+        .sample-btn {
+            background-color: var(--success);
+            margin-left: 10px;
+        }
+
+        .sample-btn:hover {
+            background-color: var(--dark-success);
+        }
+
+        .button-group {
+            display: flex;
+            margin-bottom: 20px;
+        }
+
+        .error {
+            color: #ef4444;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Unix File Permission Converter</h1>
+
+        <div class="description">
+            <p>Paste the output from the <code>ls -l</code> command below to convert Unix file permissions to a
+                human-readable format.</p>
+        </div>
+
+        <div class="card">
+            <textarea id="input-text" placeholder="Paste ls -l output here. Example:
+-rw-r--r-- 1 user group 2048 Mar 15 14:30 file.txt
+drwxr-xr-x 2 user group 4096 Mar 10 09:15 directory"></textarea>
+
+            <div class="button-group">
+                <button id="convert-btn">Convert Permissions</button>
+                <button id="sample-btn" class="sample-btn">Load Sample</button>
+                <button id="clear-btn" class="clear-btn">Clear</button>
+            </div>
+
+            <div id="error-message" class="error" style="display: none;"></div>
+
+            <div id="results" class="results"></div>
+        </div>
+
+        <div class="explanation card">
+            <h3>Understanding Unix Permissions</h3>
+            <p>Unix permissions are represented by a string of characters like <code>-rw-r--r--</code>:</p>
+            <ul>
+                <li>The first character indicates the file type: <code>-</code> (regular file), <code>d</code>
+                    (directory), <code>l</code> (symbolic link), etc.</li>
+                <li>The next 9 characters are split into 3 groups of 3, representing permissions for the owner, group,
+                    and others.</li>
+                <li>In each group, the 3 positions represent read (<code>r</code>), write (<code>w</code>), and execute
+                    (<code>x</code>) permissions.</li>
+                <li>If a permission is not granted, it's shown as <code>-</code>.</li>
+            </ul>
+            <p>The numeric representation (like 644) corresponds to these permissions, where each digit represents the
+                sum of permissions for a group (4 for read, 2 for write, 1 for execute).</p>
+
+            <h4>Special Permission Bits</h4>
+            <p>Unix also has special permission bits:</p>
+            <ul>
+                <li><strong>SetUID (s/S in owner execute position)</strong>: When set on an executable file, the program
+                    runs with the permissions of the file owner rather than the user who started it.</li>
+                <li><strong>SetGID (s/S in group execute position)</strong>: When set on an executable file, the program
+                    runs with the permissions of the file group. When set on a directory, new files created in that
+                    directory inherit the group of the directory.</li>
+                <li><strong>Sticky Bit (t/T in others execute position)</strong>: When set on a directory, files within
+                    that directory can only be renamed or deleted by their owner, the directory owner, or root.</li>
+            </ul>
+            <p>Lowercase 's' or 't' indicates the execute bit is also set, while uppercase 'S' or 'T' means the execute
+                bit is not set.</p>
+            <p>In numeric representation, these special bits add a fourth digit at the front: 4 for setuid, 2 for
+                setgid, and 1 for sticky bit (e.g., 2755 means setgid + rwxr-xr-x).</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const inputText = document.getElementById('input-text');
+            const convertBtn = document.getElementById('convert-btn');
+            const clearBtn = document.getElementById('clear-btn');
+            const sampleBtn = document.getElementById('sample-btn');
+            const resultsDiv = document.getElementById('results');
+            const errorMessage = document.getElementById('error-message');
+
+            const sampleData = `-rw-r--r-- 1 user group 2048 Mar 15 14:30 file.txt
+drwxr-xr-x 2 user group 4096 Mar 10 09:15 documents
+-rwxr-xr-x 1 user group 8425 Mar 12 10:45 script.sh
+-rw------- 1 user group 1024 Mar 14 16:20 private.key
+lrwxrwxrwx 1 user group   12 Mar 11 11:30 link.txt -> original.txt
+-rw-rw---- 1 user group 3072 Mar 13 13:15 shared_project.doc`;
+
+            sampleBtn.addEventListener('click', function () {
+                inputText.value = sampleData;
+            });
+
+            clearBtn.addEventListener('click', function () {
+                inputText.value = '';
+                resultsDiv.innerHTML = '';
+                errorMessage.style.display = 'none';
+            });
+
+            convertBtn.addEventListener('click', function () {
+                const input = inputText.value.trim();
+
+                if (!input) {
+                    errorMessage.textContent = 'Please enter the output from the ls command.';
+                    errorMessage.style.display = 'block';
+                    resultsDiv.innerHTML = '';
+                    return;
+                }
+
+                errorMessage.style.display = 'none';
+                resultsDiv.innerHTML = '';
+
+                const lines = input.split('\n');
+                let validEntriesFound = false;
+
+                lines.forEach(line => {
+                    if (!line.trim()) return;
+
+                    const result = parseLsLine(line);
+
+                    if (result) {
+                        validEntriesFound = true;
+                        const fileItemDiv = createFileItemElement(result);
+                        resultsDiv.appendChild(fileItemDiv);
+                    }
+                });
+
+                if (!validEntriesFound) {
+                    errorMessage.textContent = 'No valid file entries found. Please ensure you\'re pasting output from ls -l command.';
+                    errorMessage.style.display = 'block';
+                }
+            });
+
+            function parseLsLine(line) {
+                // Pattern to match ls -l output format with flexible whitespace
+                // This pattern is more flexible to handle various formats including quoted filenames
+                const pattern = /^([dlcbps-])([-rwxsStT]{3})([-rwxsStT]{3})([-rwxsStT]{3})\s+(\d+)\s+(\S+)\s+(\S+)\s+(\d+)\s+(.*?)\s+(.+?)$/;
+                const match = line.match(pattern);
+
+                if (!match) {
+                    // Try another pattern with more flexible whitespace
+                    const flexPattern = /^([dlcbps-])([-rwxsStT]{3})([-rwxsStT]{3})([-rwxsStT]{3})\s+(\d+)\s+(\S+)\s+(\S+)\s+(\d+)\s+(.+)$/;
+                    const flexMatch = line.match(flexPattern);
+
+                    if (flexMatch) {
+                        // Handle the date and filename differently
+                        const remainingPart = flexMatch[9].trim();
+                        const dateAndFile = remainingPart.match(/^(.*?\d{4}|.*?\d{1,2}:\d{1,2})\s+(.+)$/);
+
+                        if (dateAndFile) {
+                            return {
+                                fileType: flexMatch[1],
+                                ownerPerm: flexMatch[2],
+                                groupPerm: flexMatch[3],
+                                otherPerm: flexMatch[4],
+                                links: flexMatch[5],
+                                owner: flexMatch[6],
+                                group: flexMatch[7],
+                                size: flexMatch[8],
+                                date: dateAndFile[1].trim(),
+                                fileName: dateAndFile[2].trim().replace(/^['"](.*)['"]$/, '$1') // Remove surrounding quotes if present
+                            };
+                        }
+                    }
+
+                    // Try a simpler pattern that might just have the permissions and filename
+                    const simplePattern = /^([dlcbps-])([-rwxsStT]{3})([-rwxsStT]{3})([-rwxsStT]{3})\s+(.+)$/;
+                    const simpleMatch = line.match(simplePattern);
+
+                    if (simpleMatch) {
+                        return {
+                            fileType: simpleMatch[1],
+                            ownerPerm: simpleMatch[2],
+                            groupPerm: simpleMatch[3],
+                            otherPerm: simpleMatch[4],
+                            fileName: simpleMatch[5].trim().replace(/^['"](.*)['"]$/, '$1') // Remove surrounding quotes if present
+                        };
+                    } else {
+                        return null;
+                    }
+                }
+
+                // Check if the result has a -> for symbolic links
+                let fileName = match[10];
+                let linkTarget = null;
+
+                const linkMatch = fileName.match(/^(.+?)\s+->\s+(.+)$/);
+                if (linkMatch) {
+                    fileName = linkMatch[1];
+                    linkTarget = linkMatch[2];
+                }
+
+                return {
+                    fileType: match[1],
+                    ownerPerm: match[2],
+                    groupPerm: match[3],
+                    otherPerm: match[4],
+                    links: match[5],
+                    owner: match[6],
+                    group: match[7],
+                    size: match[8],
+                    date: match[9],
+                    fileName: fileName.replace(/^['"](.*)['"]$/, '$1'), // Remove surrounding quotes if present
+                    linkTarget: linkTarget
+                };
+            }
+
+            function createFileItemElement(fileInfo) {
+                const fileItemDiv = document.createElement('div');
+                fileItemDiv.className = 'file-item';
+
+                const fileHeader = document.createElement('div');
+                fileHeader.className = 'file-header';
+
+                const fileName = document.createElement('div');
+                fileName.className = 'file-name';
+                fileName.textContent = fileInfo.fileName;
+                if (fileInfo.linkTarget) {
+                    fileName.textContent += ` → ${fileInfo.linkTarget}`;
+                }
+                fileHeader.appendChild(fileName);
+
+                const fileTypeSpan = document.createElement('div');
+                fileTypeSpan.className = 'file-type';
+                fileTypeSpan.textContent = getFileTypeDescription(fileInfo.fileType);
+                fileHeader.appendChild(fileTypeSpan);
+
+                fileItemDiv.appendChild(fileHeader);
+
+                // Owner, group, size info if available
+                if (fileInfo.owner) {
+                    const fileDetailsDiv = document.createElement('div');
+                    fileDetailsDiv.style.marginTop = '5px';
+                    fileDetailsDiv.style.fontSize = '14px';
+                    fileDetailsDiv.style.color = '#6b7280';
+
+                    let detailsText = '';
+                    if (fileInfo.owner) detailsText += `Owner: ${fileInfo.owner}`;
+                    if (fileInfo.group) detailsText += ` | Group: ${fileInfo.group}`;
+                    if (fileInfo.size) detailsText += ` | Size: ${fileInfo.size} bytes`;
+                    if (fileInfo.date) detailsText += ` | Date: ${fileInfo.date}`;
+
+                    fileDetailsDiv.textContent = detailsText;
+                    fileItemDiv.appendChild(fileDetailsDiv);
+                }
+
+                // Numeric permission
+                const numericDiv = document.createElement('div');
+                numericDiv.className = 'numeric-permission';
+                const numericPermission = calculateNumericPermission(
+                    fileInfo.ownerPerm,
+                    fileInfo.groupPerm,
+                    fileInfo.otherPerm
+                );
+                numericDiv.textContent = `Permission: ${fileInfo.fileType}${fileInfo.ownerPerm}${fileInfo.groupPerm}${fileInfo.otherPerm} (${numericPermission})`;
+                fileItemDiv.appendChild(numericDiv);
+
+                // Permission details
+                const permissionsDiv = document.createElement('div');
+                permissionsDiv.className = 'permission-details';
+
+                // Owner permissions
+                permissionsDiv.appendChild(
+                    createPermissionGroup('Owner', fileInfo.ownerPerm)
+                );
+
+                // Group permissions
+                permissionsDiv.appendChild(
+                    createPermissionGroup('Group', fileInfo.groupPerm)
+                );
+
+                // Others permissions
+                permissionsDiv.appendChild(
+                    createPermissionGroup('Others', fileInfo.otherPerm)
+                );
+
+                fileItemDiv.appendChild(permissionsDiv);
+
+                return fileItemDiv;
+            }
+
+            function createPermissionGroup(title, permissions) {
+                const groupDiv = document.createElement('div');
+                groupDiv.className = 'permission-group';
+
+                const titleEl = document.createElement('h4');
+                titleEl.textContent = title;
+                groupDiv.appendChild(titleEl);
+
+                const permList = document.createElement('ul');
+
+                // Read permission
+                const readLi = document.createElement('li');
+                const readIcon = document.createElement('span');
+                readIcon.className = permissions[0] === 'r' ? 'check-icon granted' : 'x-icon denied';
+                readIcon.textContent = permissions[0] === 'r' ? '✓' : '✗';
+                readLi.appendChild(readIcon);
+
+                const readText = document.createElement('span');
+                readText.textContent = 'Read';
+                readLi.appendChild(readText);
+                permList.appendChild(readLi);
+
+                // Write permission
+                const writeLi = document.createElement('li');
+                const writeIcon = document.createElement('span');
+                writeIcon.className = permissions[1] === 'w' ? 'check-icon granted' : 'x-icon denied';
+                writeIcon.textContent = permissions[1] === 'w' ? '✓' : '✗';
+                writeLi.appendChild(writeIcon);
+
+                const writeText = document.createElement('span');
+                writeText.textContent = 'Write';
+                writeLi.appendChild(writeText);
+                permList.appendChild(writeLi);
+
+                // Execute permission - handle special bits (s, S, t, T)
+                const execLi = document.createElement('li');
+                const execIcon = document.createElement('span');
+
+                // Handle the special permission bits
+                let execText;
+                let specialBit = false;
+
+                if (permissions[2] === 'x' || permissions[2] === 's' || permissions[2] === 't') {
+                    execIcon.className = 'check-icon granted';
+                    execIcon.textContent = '✓';
+                } else {
+                    execIcon.className = 'x-icon denied';
+                    execIcon.textContent = '✗';
+                }
+
+                execLi.appendChild(execIcon);
+
+                if (title === 'Owner' && (permissions[2] === 's' || permissions[2] === 'S')) {
+                    execText = document.createElement('span');
+                    execText.textContent = 'Execute + SetUID';
+                    specialBit = true;
+                } else if (title === 'Group' && (permissions[2] === 's' || permissions[2] === 'S')) {
+                    execText = document.createElement('span');
+                    execText.textContent = 'Execute + SetGID';
+                    specialBit = true;
+                } else if (title === 'Others' && (permissions[2] === 't' || permissions[2] === 'T')) {
+                    execText = document.createElement('span');
+                    execText.textContent = 'Execute + Sticky Bit';
+                    specialBit = true;
+                } else {
+                    execText = document.createElement('span');
+                    execText.textContent = 'Execute';
+                }
+
+                if (specialBit) {
+                    execText.style.color = '#6366f1'; // Indigo color for special bits
+                }
+
+                execLi.appendChild(execText);
+                permList.appendChild(execLi);
+
+                groupDiv.appendChild(permList);
+
+                return groupDiv;
+            }
+
+            function calculateNumericPermission(ownerPerm, groupPerm, otherPerm) {
+                const calcValue = (perm) => {
+                    let value = 0;
+                    if (perm[0] === 'r') value += 4;
+                    if (perm[1] === 'w') value += 2;
+                    if (perm[2] === 'x' || perm[2] === 's' || perm[2] === 't') value += 1;
+                    return value;
+                };
+
+                // Calculate the special bits
+                let specialBits = 0;
+                if (ownerPerm[2] === 's' || ownerPerm[2] === 'S') specialBits += 4; // setuid
+                if (groupPerm[2] === 's' || groupPerm[2] === 'S') specialBits += 2; // setgid
+                if (otherPerm[2] === 't' || otherPerm[2] === 'T') specialBits += 1; // sticky
+
+                const basicPermission = `${calcValue(ownerPerm)}${calcValue(groupPerm)}${calcValue(otherPerm)}`;
+
+                if (specialBits > 0) {
+                    return `${specialBits}${basicPermission}`;
+                } else {
+                    return basicPermission;
+                }
+            }
+
+            function getFileTypeDescription(typeChar) {
+                switch (typeChar) {
+                    case '-': return 'Regular File';
+                    case 'd': return 'Directory';
+                    case 'l': return 'Symbolic Link';
+                    case 'c': return 'Character Device';
+                    case 'b': return 'Block Device';
+                    case 'p': return 'Named Pipe';
+                    case 's': return 'Socket';
+                    default: return 'Unknown';
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>
