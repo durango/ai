@@ -1,8 +1,311 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description"
+    content="Free online developer tools for Unix permissions conversion and PostgreSQL column optimization. Parse ls -l output and optimize your database tables with our easy-to-use utilities.">
+  <title>DevUtils | Unix Permissions & PostgreSQL Optimizers</title>
+  <style>
+    :root {
+      --primary: #3b82f6;
+      --primary-dark: #2563eb;
+      --secondary: #10b981;
+      --secondary-dark: #059669;
+      --bg-color: #f9fafb;
+      --card-bg: #ffffff;
+      --text-color: #1f2937;
+      --border-color: #e5e7eb;
+      --heading-color: #1e40af;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.6;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      margin: 0;
+      padding: 0;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      color: white;
+      padding: 4rem 2rem;
+      text-align: center;
+    }
+
+    .hero h1 {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .hero p {
+      font-size: 1.25rem;
+      max-width: 800px;
+      margin: 0 auto 2rem;
+      opacity: 0.9;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 3rem 2rem;
+    }
+
+    .tools-intro {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .tools-intro h2 {
+      color: var(--heading-color);
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    .tools-intro p {
+      max-width: 800px;
+      margin: 0 auto;
+      font-size: 1.1rem;
+    }
+
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+    }
+
+    .tool-card {
+      background-color: var(--card-bg);
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .tool-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .tool-header {
+      padding: 1.5rem 2rem;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+    }
+
+    .tool-icon {
+      width: 50px;
+      height: 50px;
+      margin-right: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      border-radius: 8px;
+    }
+
+    .unix-icon {
+      background-color: var(--primary);
+    }
+
+    .postgres-icon {
+      background-color: var(--secondary);
+    }
+
+    .tool-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin: 0;
+    }
+
+    .tool-body {
+      padding: 1.5rem 2rem;
+    }
+
+    .tool-description {
+      margin-bottom: 1.5rem;
+    }
+
+    .tool-features {
+      margin-bottom: 1.5rem;
+    }
+
+    .tool-features h4 {
+      margin-top: 0;
+      margin-bottom: 0.75rem;
+      color: var(--heading-color);
+    }
+
+    .feature-list {
+      list-style-type: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .feature-list li {
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: flex-start;
+    }
+
+    .feature-list li::before {
+      content: "✓";
+      margin-right: 0.5rem;
+      color: var(--primary);
+      font-weight: bold;
+    }
+
+    .tool-cta {
+      text-align: center;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 0.75rem 1.5rem;
+      border-radius: 6px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: background-color 0.2s;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background-color: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--primary-dark);
+    }
+
+    .btn-secondary {
+      background-color: var(--secondary);
+      color: white;
+    }
+
+    .btn-secondary:hover {
+      background-color: var(--secondary-dark);
+    }
+
+    .footer {
+      background-color: var(--text-color);
+      color: white;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    .footer p {
+      margin: 0;
+      opacity: 0.8;
+    }
+
+    @media (max-width: 768px) {
+      .hero h1 {
+        font-size: 2rem;
+      }
+
+      .hero p {
+        font-size: 1.1rem;
+      }
+
+      .tools-intro h2 {
+        font-size: 1.75rem;
+      }
+    }
+  </style>
+</head>
 
 <body>
-  <a href="./postgres-column-sorter">Postgres Column Sorter</a><br />
-  <a href="./unix-permission-converter">Unix Permission Converter</a>
+  <section class="hero">
+    <h1>Developer Utilities for Unix & PostgreSQL</h1>
+    <p>Free online tools to enhance your development workflow. Convert Unix permissions and optimize PostgreSQL table
+      structures with ease.</p>
+  </section>
+
+  <div class="container">
+    <div class="tools-intro">
+      <h2>Powerful Tools for Developers</h2>
+      <p>These specialized utilities help streamline common tasks for system administrators and database developers.
+        Save time and improve your workflow with our free online tools.</p>
+    </div>
+
+    <div class="tools-grid">
+      <div class="tool-card">
+        <div class="tool-header">
+          <div class="tool-icon unix-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 19h16a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2z"></path>
+              <path d="M8 7v10"></path>
+              <path d="M12 7v10"></path>
+              <path d="M16 7v10"></path>
+            </svg>
+          </div>
+          <h3 class="tool-title">Unix Permission Converter</h3>
+        </div>
+        <div class="tool-body">
+          <div class="tool-description">
+            <p>Translate cryptic Unix file permissions from <code>ls -l</code> output into a clear, human-readable
+              format. Understand permissions at a glance with our visual converter.</p>
+          </div>
+          <div class="tool-features">
+            <h4>Features:</h4>
+            <ul class="feature-list">
+              <li>Parse <code>ls -l</code> command output</li>
+              <li>Visual representation of permissions</li>
+              <li>Calculate numeric permission values</li>
+              <li>Handle special permission bits (SetUID, SetGID, Sticky)</li>
+              <li>Support for all Unix file types</li>
+            </ul>
+          </div>
+          <div class="tool-cta">
+            <a href="./unix-permission-converter" class="btn btn-primary">Open Permission Converter</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-header">
+          <div class="tool-icon postgres-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+              <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
+              <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
+            </svg>
+          </div>
+          <h3 class="tool-title">PostgreSQL Column Sorter</h3>
+        </div>
+        <div class="tool-body">
+          <div class="tool-description">
+            <p>Optimize your PostgreSQL table structure by automatically sorting columns based on data type size and
+              alignment. Improve database performance with properly ordered columns.</p>
+          </div>
+          <div class="tool-features">
+            <h4>Features:</h4>
+            <ul class="feature-list">
+              <li>Reorder columns by alignment requirements</li>
+              <li>Optimize storage efficiency</li>
+              <li>Parse CREATE TABLE statements</li>
+              <li>Maintain table constraints</li>
+              <li>Easy-to-use interface</li>
+            </ul>
+          </div>
+          <div class="tool-cta">
+            <a href="./postgresql-column-sorter" class="btn btn-secondary">Open Column Sorter</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <p>© 2025 DevUtils. Free online tools for developers and system administrators.</p>
+  </footer>
 </body>
 
 </html>

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Background circle -->
+  <circle cx="32" cy="32" r="30" fill="#336791" />
+  
+  <!-- Stylized columns of varying heights (representing sorted columns) -->
+  <rect x="14" y="38" width="8" height="14" rx="1" fill="#ffffff" />
+  <rect x="28" y="26" width="8" height="26" rx="1" fill="#ffffff" />
+  <rect x="42" y="18" width="8" height="34" rx="1" fill="#ffffff" />
+  
+  <!-- Small sorting arrow -->
+  <path d="M32 10 L40 18 L24 18 Z" fill="#ffffff" />
+</svg>

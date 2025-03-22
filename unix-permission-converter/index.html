@@ -4,295 +4,394 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Unix Permission Converter</title>
-    <style>
-        :root {
-            --primary: #3b82f6;
-            --primary-dark: #2563eb;
-            --bg-color: #f9fafb;
-            --card-bg: #ffffff;
-            --text-color: #1f2937;
-            --border-color: #e5e7eb;
-            --success: #10b981;
-            --dark-success: #059669;
-        }
+    <meta name="description"
+        content="Convert Unix file permissions to a human-readable format with this free online tool. Understand ls -l output, chmod numeric values, and special permission bits easily.">
+    <meta name="keywords"
+        content="unix permissions, linux permissions, ls -l, chmod, file permissions, permission converter, setuid, setgid, sticky bit">
+    <meta name="author" content="durango">
+    <meta name="robots" content="index, follow">
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            line-height: 1.5;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 20px;
-        }
+    <!-- Open Graph / Social Media Meta Tags -->
+    <meta property="og:title" content="Unix File Permission Converter & Explainer">
+    <meta property="og:description"
+        content="Convert Unix/Linux file permissions to a human-readable format. Understand ls -l output and chmod numeric values easily.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://durango.github.io/ai/unix-permission-converter">
 
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-        }
+    <title>Unix File Permission Converter & Explainer | Free Online Tool</title>
 
-        h1 {
-            text-align: center;
-            margin-bottom: 30px;
-            color: var(--primary-dark);
-        }
+    <link rel="canonical" href="https://durango.github.io/ai/unix-permission-converter">
 
-        .card {
-            background-color: var(--card-bg);
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            padding: 20px;
-            margin-bottom: 20px;
-        }
+    <!-- Favicon -->
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔐</text></svg>">
 
-        .description {
-            margin-bottom: 20px;
-            text-align: center;
-        }
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap"
+        rel="stylesheet">
 
-        textarea {
-            width: 100%;
-            height: 150px;
-            padding: 12px;
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            resize: vertical;
-            font-family: monospace;
-            margin-bottom: 15px;
-        }
-
-        button {
-            background-color: var(--primary);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: background-color 0.2s;
-        }
-
-        button:hover {
-            background-color: var(--primary-dark);
-        }
-
-        .results {
-            margin-top: 20px;
-        }
-
-        .file-item {
-            padding: 12px;
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            margin-bottom: 10px;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .file-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-
-        .permission-details {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 10px;
-            margin-top: 10px;
-        }
-
-        .permission-group {
-            padding: 10px;
-            border-radius: 4px;
-            background-color: #f3f4f6;
-        }
-
-        .permission-group h4 {
-            margin-top: 0;
-            margin-bottom: 8px;
-            color: var(--primary-dark);
-        }
-
-        .permission-group ul {
-            list-style-type: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .permission-group li {
-            padding: 3px 0;
-            display: flex;
-            align-items: center;
-        }
-
-        .permission-group li span {
-            margin-left: 8px;
-        }
-
-        .granted {
-            color: var(--success);
-        }
-
-        .denied {
-            color: #ef4444;
-        }
-
-        .check-icon,
-        .x-icon {
-            display: inline-block;
-            width: 18px;
-            text-align: center;
-        }
-
-        .file-type {
-            padding: 3px 8px;
-            border-radius: 12px;
-            font-size: 14px;
-            font-weight: 600;
-            background-color: #e5e7eb;
-        }
-
-        .numeric-permission {
-            margin-top: 5px;
-            font-family: monospace;
-            font-size: 14px;
-            color: #6b7280;
-        }
-
-        .file-name {
-            font-weight: 600;
-            word-break: break-all;
-        }
-
-        .explanation {
-            margin-top: 20px;
-            padding: 15px;
-            background-color: #f3f4f6;
-            border-radius: 4px;
-        }
-
-        .explanation h3 {
-            margin-top: 0;
-            color: var(--primary-dark);
-        }
-
-        .clear-btn {
-            background-color: #f3f4f6;
-            color: #4b5563;
-            margin-left: 10px;
-        }
-
-        .clear-btn:hover {
-            background-color: #e5e7eb;
-        }
-
-        .sample-btn {
-            background-color: var(--success);
-            margin-left: 10px;
-        }
-
-        .sample-btn:hover {
-            background-color: var(--dark-success);
-        }
-
-        .button-group {
-            display: flex;
-            margin-bottom: 20px;
-        }
-
-        .error {
-            color: #ef4444;
-            margin-top: 10px;
-        }
-    </style>
+    <link href="../style.css" rel="stylesheet">
 </head>
 
 <body>
     <div class="container">
-        <h1>Unix File Permission Converter</h1>
-
-        <div class="description">
-            <p>Paste the output from the <code>ls -l</code> command below to convert Unix file permissions to a
-                human-readable format.</p>
-        </div>
+        <header>
+            <h1>Unix File Permission Converter</h1>
+            <p class="tagline">Easily convert and understand Unix/Linux file permissions</p>
+        </header>
 
         <div class="card">
-            <textarea id="input-text" placeholder="Paste ls -l output here. Example:
--rw-r--r-- 1 user group 2048 Mar 15 14:30 file.txt
-drwxr-xr-x 2 user group 4096 Mar 10 09:15 directory"></textarea>
-
-            <div class="button-group">
-                <button id="convert-btn">Convert Permissions</button>
-                <button id="sample-btn" class="sample-btn">Load Sample</button>
-                <button id="clear-btn" class="clear-btn">Clear</button>
+            <div class="description">
+                <p>Paste the output from <code>ls -l</code> command below to convert Unix file permissions to a
+                    human-readable format.</p>
             </div>
 
-            <div id="error-message" class="error" style="display: none;"></div>
+            <textarea id="input-text" aria-label="ls -l output" placeholder="Paste ls -l output here. Example:
+-rw-r--r-- 1 user group 2048 Mar 15 14:30 file.txt
+drwxr-xr-x 2 user group 4096 Mar 10 09:15 directory
+-rwxr-xr-x 1 user group 8425 Mar 12 10:45 script.sh"></textarea>
 
-            <div id="results" class="results"></div>
+            <div class="button-group">
+                <button id="convert-btn" aria-label="Convert permissions">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                    Convert Permissions
+                </button>
+                <button id="sample-btn" class="sample-btn" aria-label="Load sample data">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    Load Sample
+                </button>
+                <button id="clear-btn" class="clear-btn" aria-label="Clear all">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                    Clear
+                </button>
+            </div>
+
+            <div id="loader" class="loader" aria-live="polite"></div>
+            <div id="error-message" class="error" style="display: none;" aria-live="assertive"></div>
+            <div id="results" class="results" aria-live="polite"></div>
         </div>
 
-        <div class="explanation card">
-            <h3>Understanding Unix Permissions</h3>
-            <p>Unix permissions are represented by a string of characters like <code>-rw-r--r--</code>:</p>
-            <ul>
-                <li>The first character indicates the file type: <code>-</code> (regular file), <code>d</code>
-                    (directory), <code>l</code> (symbolic link), etc.</li>
-                <li>The next 9 characters are split into 3 groups of 3, representing permissions for the owner, group,
-                    and others.</li>
-                <li>In each group, the 3 positions represent read (<code>r</code>), write (<code>w</code>), and execute
-                    (<code>x</code>) permissions.</li>
-                <li>If a permission is not granted, it's shown as <code>-</code>.</li>
-            </ul>
-            <p>The numeric representation (like 644) corresponds to these permissions, where each digit represents the
-                sum of permissions for a group (4 for read, 2 for write, 1 for execute).</p>
+        <section class="explanation card">
+            <h2>Understanding Unix Permissions</h2>
 
-            <h4>Special Permission Bits</h4>
-            <p>Unix also has special permission bits:</p>
-            <ul>
-                <li><strong>SetUID (s/S in owner execute position)</strong>: When set on an executable file, the program
-                    runs with the permissions of the file owner rather than the user who started it.</li>
-                <li><strong>SetGID (s/S in group execute position)</strong>: When set on an executable file, the program
-                    runs with the permissions of the file group. When set on a directory, new files created in that
-                    directory inherit the group of the directory.</li>
-                <li><strong>Sticky Bit (t/T in others execute position)</strong>: When set on a directory, files within
-                    that directory can only be renamed or deleted by their owner, the directory owner, or root.</li>
-            </ul>
-            <p>Lowercase 's' or 't' indicates the execute bit is also set, while uppercase 'S' or 'T' means the execute
-                bit is not set.</p>
-            <p>In numeric representation, these special bits add a fourth digit at the front: 4 for setuid, 2 for
-                setgid, and 1 for sticky bit (e.g., 2755 means setgid + rwxr-xr-x).</p>
-        </div>
+            <div class="tabs">
+                <button class="tab-button active" data-tab="basics">Basic Concepts</button>
+                <button class="tab-button" data-tab="numeric">Numeric Representation</button>
+                <button class="tab-button" data-tab="special">Special Permissions</button>
+                <button class="tab-button" data-tab="commands">Useful Commands</button>
+                <button class="tab-button" data-tab="examples">Common Examples</button>
+            </div>
+
+            <div class="tab-content active" id="basics">
+                <h3>Basic Concepts</h3>
+                <p>Unix permissions are represented by a string of characters like <code>-rw-r--r--</code>:</p>
+                <ul>
+                    <li>The first character indicates the file type: <code>-</code> (regular file), <code>d</code>
+                        (directory), <code>l</code> (symbolic link), etc.</li>
+                    <li>The next 9 characters are split into 3 groups of 3, representing permissions for the owner,
+                        group, and others.</li>
+                    <li>In each group, the 3 positions represent read (<code>r</code>), write (<code>w</code>), and
+                        execute (<code>x</code>) permissions.</li>
+                    <li>If a permission is not granted, it's shown as <code>-</code>.</li>
+                </ul>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Position</th>
+                            <th>Meaning</th>
+                            <th>When Set</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>File Type</td>
+                            <td><code>-</code> (regular file), <code>d</code> (directory), <code>l</code> (link), etc.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>2-4</td>
+                            <td>Owner Permissions</td>
+                            <td>Read (<code>r</code>), Write (<code>w</code>), Execute (<code>x</code>)</td>
+                        </tr>
+                        <tr>
+                            <td>5-7</td>
+                            <td>Group Permissions</td>
+                            <td>Read (<code>r</code>), Write (<code>w</code>), Execute (<code>x</code>)</td>
+                        </tr>
+                        <tr>
+                            <td>8-10</td>
+                            <td>Others Permissions</td>
+                            <td>Read (<code>r</code>), Write (<code>w</code>), Execute (<code>x</code>)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="tab-content" id="numeric">
+                <h3>Numeric Representation</h3>
+                <p>Permissions can also be represented numerically, where each permission has a value:</p>
+                <ul>
+                    <li>Read (<code>r</code>) = 4</li>
+                    <li>Write (<code>w</code>) = 2</li>
+                    <li>Execute (<code>x</code>) = 1</li>
+                </ul>
+                <p>The numeric value for each group (owner, group, others) is the sum of the permissions granted. For
+                    example:</p>
+                <ul>
+                    <li><code>rwx</code> = 4+2+1 = 7</li>
+                    <li><code>rw-</code> = 4+2+0 = 6</li>
+                    <li><code>r--</code> = 4+0+0 = 4</li>
+                </ul>
+                <p>A common permission like <code>-rw-r--r--</code> would be represented as <code>644</code> (6 for
+                    owner, 4 for group, 4 for others).</p>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Symbolic</th>
+                            <th>Numeric</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>-rwxrwxrwx</code></td>
+                            <td>777</td>
+                            <td>Everyone can read, write, and execute</td>
+                        </tr>
+                        <tr>
+                            <td><code>-rw-rw-rw-</code></td>
+                            <td>666</td>
+                            <td>Everyone can read and write</td>
+                        </tr>
+                        <tr>
+                            <td><code>-rw-r--r--</code></td>
+                            <td>644</td>
+                            <td>Owner can read and write, group and others can only read</td>
+                        </tr>
+                        <tr>
+                            <td><code>-rwx------</code></td>
+                            <td>700</td>
+                            <td>Owner can read, write, and execute, no permissions for group or others</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="tab-content" id="special">
+                <h3>Special Permission Bits</h3>
+                <p>Unix also has special permission bits that provide additional functionality:</p>
+
+                <h4>SetUID (Set User ID)</h4>
+                <p>When the SetUID bit is set on an executable file, the program runs with the permissions of the file
+                    owner rather than the user who started it.</p>
+                <ul>
+                    <li>Symbolic representation: <code>s</code> in the owner's execute position</li>
+                    <li>Numeric value: 4000 (added as a fourth digit at the front)</li>
+                    <li>Example: <code>-rwsr--r--</code> (4644)</li>
+                </ul>
+
+                <h4>SetGID (Set Group ID)</h4>
+                <p>When the SetGID bit is set on an executable file, the program runs with the permissions of the file
+                    group. When set on a directory, new files created in that directory inherit the group of the
+                    directory.</p>
+                <ul>
+                    <li>Symbolic representation: <code>s</code> in the group's execute position</li>
+                    <li>Numeric value: 2000 (added as a fourth digit)</li>
+                    <li>Example: <code>-rw-r-sr--</code> (2644)</li>
+                </ul>
+
+                <h4>Sticky Bit</h4>
+                <p>When the sticky bit is set on a directory, files within that directory can only be renamed or deleted
+                    by their owner, the directory owner, or root.</p>
+                <ul>
+                    <li>Symbolic representation: <code>t</code> in the others' execute position</li>
+                    <li>Numeric value: 1000 (added as a fourth digit)</li>
+                    <li>Example: <code>drwxr-xr-t</code> (1755)</li>
+                </ul>
+
+                <p>Note: Lowercase (<code>s</code>, <code>t</code>) indicates the execute bit is also set, while
+                    uppercase (<code>S</code>, <code>T</code>) means the execute bit is not set.</p>
+            </div>
+
+            <div class="tab-content" id="commands">
+                <h3>Useful Commands</h3>
+
+                <h4>Viewing Permissions</h4>
+                <p>To view permissions of files and directories:</p>
+                <ul>
+                    <li><code>ls -l</code>: List files with detailed information including permissions</li>
+                    <li><code>ls -la</code>: Same as above, but includes hidden files (those starting with a dot)</li>
+                    <li><code>stat filename</code>: Show detailed file information including permissions</li>
+                </ul>
+
+                <h4>Changing Permissions</h4>
+                <p>To modify file permissions:</p>
+                <ul>
+                    <li><code>chmod permissions filename</code>: Change permissions of a file or directory</li>
+                    <li><code>chmod u+x filename</code>: Add execute permission for the owner</li>
+                    <li><code>chmod g-w filename</code>: Remove write permission for the group</li>
+                    <li><code>chmod o=r filename</code>: Set others' permission to read-only</li>
+                    <li><code>chmod 755 filename</code>: Set permissions to rwxr-xr-x using numeric notation</li>
+                    <li><code>chmod -R 755 directory</code>: Recursively change permissions for a directory and its
+                        contents</li>
+                </ul>
+
+                <h4>Changing Ownership</h4>
+                <p>To change the owner or group of a file:</p>
+                <ul>
+                    <li><code>chown user filename</code>: Change the owner of a file</li>
+                    <li><code>chown user:group filename</code>: Change both owner and group</li>
+                    <li><code>chgrp group filename</code>: Change only the group</li>
+                    <li><code>chown -R user:group directory</code>: Recursively change ownership for a directory</li>
+                </ul>
+            </div>
+
+            <div class="tab-content" id="examples">
+                <h3>Common Examples</h3>
+                <p>Here are some common permission settings and their use cases:</p>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Symbolic</th>
+                            <th>Numeric</th>
+                            <th>Use Case</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>-rw-------</code></td>
+                            <td>600</td>
+                            <td>Private file (e.g., SSH private keys, sensitive configuration files)</td>
+                        </tr>
+                        <tr>
+                            <td><code>-rw-r--r--</code></td>
+                            <td>644</td>
+                            <td>Regular files that should be readable by everyone but writable only by the owner (e.g.,
+                                configuration files, HTML files)</td>
+                        </tr>
+                        <tr>
+                            <td><code>-rwxr-xr-x</code></td>
+                            <td>755</td>
+                            <td>Executable scripts or binaries that should be executable by everyone, but only modified
+                                by the owner</td>
+                        </tr>
+                        <tr>
+                            <td><code>drwxr-xr-x</code></td>
+                            <td>755</td>
+                            <td>Directories that everyone should be able to access and list, but only the owner can
+                                modify</td>
+                        </tr>
+                        <tr>
+                            <td><code>drwx------</code></td>
+                            <td>700</td>
+                            <td>Private directories (e.g., home directories, directories containing sensitive data)</td>
+                        </tr>
+                        <tr>
+                            <td><code>drwxrwsr-x</code></td>
+                            <td>2775</td>
+                            <td>Shared directories where all members of a group should be able to create files that
+                                remain accessible to the group</td>
+                        </tr>
+                        <tr>
+                            <td><code>drwxrwxrwt</code></td>
+                            <td>1777</td>
+                            <td>Public directories where anyone can create files, but only the owner can delete their
+                                own files (e.g., /tmp)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <footer>
+            <p>This tool helps you understand Unix file permissions. It does not modify any files on your system.</p>
+            <p>&copy; <span id="current-year"></span> Unix Permission Converter | <a href="#" id="privacy-link">Privacy
+                    Policy</a></p>
+        </footer>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            // Set current year in footer
+            document.getElementById('current-year').textContent = new Date().getFullYear();
+
+            // Elements
             const inputText = document.getElementById('input-text');
             const convertBtn = document.getElementById('convert-btn');
             const clearBtn = document.getElementById('clear-btn');
             const sampleBtn = document.getElementById('sample-btn');
             const resultsDiv = document.getElementById('results');
             const errorMessage = document.getElementById('error-message');
+            const loader = document.getElementById('loader');
+            const privacyLink = document.getElementById('privacy-link');
 
+            // Sample data
             const sampleData = `-rw-r--r-- 1 user group 2048 Mar 15 14:30 file.txt
 drwxr-xr-x 2 user group 4096 Mar 10 09:15 documents
 -rwxr-xr-x 1 user group 8425 Mar 12 10:45 script.sh
 -rw------- 1 user group 1024 Mar 14 16:20 private.key
 lrwxrwxrwx 1 user group   12 Mar 11 11:30 link.txt -> original.txt
--rw-rw---- 1 user group 3072 Mar 13 13:15 shared_project.doc`;
+-rw-rw---- 1 user group 3072 Mar 13 13:15 shared_project.doc
+-rwsr-xr-x 1 root root  43784 Mar  1 12:34 sudo
+drwxrwsr-x 2 www-data www-data 4096 Mar 16 09:22 web_uploads
+drwxrwxrwt 10 root root  4096 Mar 22 10:15 tmp`;
 
+            // Load sample data
             sampleBtn.addEventListener('click', function () {
                 inputText.value = sampleData;
+                inputText.focus();
             });
 
+            // Clear all
             clearBtn.addEventListener('click', function () {
                 inputText.value = '';
                 resultsDiv.innerHTML = '';
                 errorMessage.style.display = 'none';
+                inputText.focus();
             });
 
+            // Privacy policy placeholder
+            privacyLink.addEventListener('click', function (e) {
+                e.preventDefault();
+                alert('This is a local tool that operates entirely in your browser. No data is sent to any server or third party.');
+            });
+
+            // Tab navigation
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    // Remove active class from all buttons and contents
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    tabContents.forEach(content => content.classList.remove('active'));
+
+                    // Add active class to clicked button
+                    button.classList.add('active');
+
+                    // Show corresponding content
+                    const tabId = button.getAttribute('data-tab');
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
+
+            // Convert permissions
             convertBtn.addEventListener('click', function () {
                 const input = inputText.value.trim();
 
@@ -303,63 +402,78 @@ lrwxrwxrwx 1 user group   12 Mar 11 11:30 link.txt -> original.txt
                     return;
                 }
 
+                // Show loading animation
                 errorMessage.style.display = 'none';
                 resultsDiv.innerHTML = '';
+                loader.style.display = 'block';
 
-                const lines = input.split('\n');
-                let validEntriesFound = false;
+                // Delayed processing to show loader
+                setTimeout(() => {
+                    const lines = input.split('\n');
+                    let validEntriesFound = false;
 
-                lines.forEach(line => {
-                    if (!line.trim()) return;
+                    lines.forEach(line => {
+                        if (!line.trim()) return;
 
-                    const result = parseLsLine(line);
+                        const result = parseLsLine(line);
 
-                    if (result) {
-                        validEntriesFound = true;
-                        const fileItemDiv = createFileItemElement(result);
-                        resultsDiv.appendChild(fileItemDiv);
+                        if (result) {
+                            validEntriesFound = true;
+                            const fileItemDiv = createFileItemElement(result);
+                            resultsDiv.appendChild(fileItemDiv);
+                        }
+                    });
+
+                    // Hide loader
+                    loader.style.display = 'none';
+
+                    if (!validEntriesFound) {
+                        errorMessage.textContent = 'No valid file entries found. Please ensure you\'re pasting output from ls -l command.';
+                        errorMessage.style.display = 'block';
                     }
-                });
-
-                if (!validEntriesFound) {
-                    errorMessage.textContent = 'No valid file entries found. Please ensure you\'re pasting output from ls -l command.';
-                    errorMessage.style.display = 'block';
-                }
+                }, 400); // Short delay to show the loader
             });
 
+            // Parse ls -l output line
             function parseLsLine(line) {
                 // Pattern to match ls -l output format with flexible whitespace
-                // This pattern is more flexible to handle various formats including quoted filenames
                 const pattern = /^([dlcbps-])([-rwxsStT]{3})([-rwxsStT]{3})([-rwxsStT]{3})\s+(\d+)\s+(\S+)\s+(\S+)\s+(\d+)\s+(.*?)\s+(.+?)$/;
                 const match = line.match(pattern);
 
                 if (!match) {
                     // Try another pattern with more flexible whitespace
-                    const flexPattern = /^([dlcbps-])([-rwxsStT]{3})([-rwxsStT]{3})([-rwxsStT]{3})\s+(\d+)\s+(\S+)\s+(\S+)\s+(\d+)\s+(.+)$/;
+                    const flexPattern = /^([dlcbps-])([-rwxsStT]{3})([-rwxsStT]{3})([-rwxsStT]{3})\s+(\d+)?\s*(\S+)?\s*(\S+)?\s*(\d+)?\s*(.+?)$/;
                     const flexMatch = line.match(flexPattern);
 
                     if (flexMatch) {
-                        // Handle the date and filename differently
-                        const remainingPart = flexMatch[9].trim();
-                        const dateAndFile = remainingPart.match(/^(.*?\d{4}|.*?\d{1,2}:\d{1,2})\s+(.+)$/);
+                        // Get whatever data is available
+                        const remainingPart = flexMatch[9] ? flexMatch[9].trim() : '';
+                        let fileName = remainingPart;
+                        let linkTarget = null;
 
-                        if (dateAndFile) {
-                            return {
-                                fileType: flexMatch[1],
-                                ownerPerm: flexMatch[2],
-                                groupPerm: flexMatch[3],
-                                otherPerm: flexMatch[4],
-                                links: flexMatch[5],
-                                owner: flexMatch[6],
-                                group: flexMatch[7],
-                                size: flexMatch[8],
-                                date: dateAndFile[1].trim(),
-                                fileName: dateAndFile[2].trim().replace(/^['"](.*)['"]$/, '$1') // Remove surrounding quotes if present
-                            };
+                        // Check for symbolic link
+                        const linkMatch = remainingPart.match(/^(.+?)\s+->\s+(.+)$/);
+                        if (linkMatch) {
+                            fileName = linkMatch[1];
+                            linkTarget = linkMatch[2];
                         }
+
+                        return {
+                            fileType: flexMatch[1],
+                            ownerPerm: flexMatch[2],
+                            groupPerm: flexMatch[3],
+                            otherPerm: flexMatch[4],
+                            links: flexMatch[5] || '',
+                            owner: flexMatch[6] || '',
+                            group: flexMatch[7] || '',
+                            size: flexMatch[8] || '',
+                            date: '', // No date parsing for simple format
+                            fileName: fileName.replace(/^['"](.*)['"]$/, '$1'), // Remove surrounding quotes if present
+                            linkTarget: linkTarget
+                        };
                     }
 
-                    // Try a simpler pattern that might just have the permissions and filename
+                    // Try an even simpler pattern for just permissions and filename
                     const simplePattern = /^([dlcbps-])([-rwxsStT]{3})([-rwxsStT]{3})([-rwxsStT]{3})\s+(.+)$/;
                     const simpleMatch = line.match(simplePattern);
 
@@ -401,42 +515,79 @@ lrwxrwxrwx 1 user group   12 Mar 11 11:30 link.txt -> original.txt
                 };
             }
 
+            // Create file item element
             function createFileItemElement(fileInfo) {
                 const fileItemDiv = document.createElement('div');
                 fileItemDiv.className = 'file-item';
+                fileItemDiv.setAttribute('aria-label', `File permissions for ${fileInfo.fileName}`);
 
+                // File header with name and type
                 const fileHeader = document.createElement('div');
                 fileHeader.className = 'file-header';
 
+                // File name
                 const fileName = document.createElement('div');
                 fileName.className = 'file-name';
                 fileName.textContent = fileInfo.fileName;
+
+                // Add link indicator for symbolic links
                 if (fileInfo.linkTarget) {
-                    fileName.textContent += ` → ${fileInfo.linkTarget}`;
+                    const linkArrow = document.createElement('span');
+                    linkArrow.textContent = " → ";
+                    linkArrow.style.color = 'var(--text-muted)';
+                    linkArrow.style.margin = '0 4px';
+
+                    const targetSpan = document.createElement('span');
+                    targetSpan.textContent = fileInfo.linkTarget;
+                    targetSpan.style.color = 'var(--text-muted)';
+
+                    fileName.appendChild(linkArrow);
+                    fileName.appendChild(targetSpan);
                 }
                 fileHeader.appendChild(fileName);
 
+                // File type
                 const fileTypeSpan = document.createElement('div');
                 fileTypeSpan.className = 'file-type';
+                fileTypeSpan.setAttribute('data-type', fileInfo.fileType);
                 fileTypeSpan.textContent = getFileTypeDescription(fileInfo.fileType);
                 fileHeader.appendChild(fileTypeSpan);
 
                 fileItemDiv.appendChild(fileHeader);
 
-                // Owner, group, size info if available
-                if (fileInfo.owner) {
+                // File details (owner, group, size, date)
+                if (fileInfo.owner || fileInfo.group || fileInfo.size || fileInfo.date) {
                     const fileDetailsDiv = document.createElement('div');
-                    fileDetailsDiv.style.marginTop = '5px';
-                    fileDetailsDiv.style.fontSize = '14px';
-                    fileDetailsDiv.style.color = '#6b7280';
+                    fileDetailsDiv.className = 'file-details';
 
-                    let detailsText = '';
-                    if (fileInfo.owner) detailsText += `Owner: ${fileInfo.owner}`;
-                    if (fileInfo.group) detailsText += ` | Group: ${fileInfo.group}`;
-                    if (fileInfo.size) detailsText += ` | Size: ${fileInfo.size} bytes`;
-                    if (fileInfo.date) detailsText += ` | Date: ${fileInfo.date}`;
+                    if (fileInfo.owner) {
+                        const ownerSpan = document.createElement('span');
+                        ownerSpan.className = 'owner';
+                        ownerSpan.textContent = fileInfo.owner;
+                        fileDetailsDiv.appendChild(ownerSpan);
+                    }
 
-                    fileDetailsDiv.textContent = detailsText;
+                    if (fileInfo.group) {
+                        const groupSpan = document.createElement('span');
+                        groupSpan.className = 'group';
+                        groupSpan.textContent = fileInfo.group;
+                        fileDetailsDiv.appendChild(groupSpan);
+                    }
+
+                    if (fileInfo.size) {
+                        const sizeSpan = document.createElement('span');
+                        sizeSpan.className = 'size';
+                        sizeSpan.textContent = formatFileSize(fileInfo.size);
+                        fileDetailsDiv.appendChild(sizeSpan);
+                    }
+
+                    if (fileInfo.date) {
+                        const dateSpan = document.createElement('span');
+                        dateSpan.className = 'date';
+                        dateSpan.textContent = fileInfo.date;
+                        fileDetailsDiv.appendChild(dateSpan);
+                    }
+
                     fileItemDiv.appendChild(fileDetailsDiv);
                 }
 
@@ -457,25 +608,32 @@ lrwxrwxrwx 1 user group   12 Mar 11 11:30 link.txt -> original.txt
 
                 // Owner permissions
                 permissionsDiv.appendChild(
-                    createPermissionGroup('Owner', fileInfo.ownerPerm)
+                    createPermissionGroup('Owner', fileInfo.ownerPerm, 'user')
                 );
 
                 // Group permissions
                 permissionsDiv.appendChild(
-                    createPermissionGroup('Group', fileInfo.groupPerm)
+                    createPermissionGroup('Group', fileInfo.groupPerm, 'group')
                 );
 
                 // Others permissions
                 permissionsDiv.appendChild(
-                    createPermissionGroup('Others', fileInfo.otherPerm)
+                    createPermissionGroup('Others', fileInfo.otherPerm, 'world')
                 );
 
                 fileItemDiv.appendChild(permissionsDiv);
 
+                // Add a subtle animation when creating the element
+                setTimeout(() => {
+                    fileItemDiv.style.opacity = '1';
+                    fileItemDiv.style.transform = 'translateY(0)';
+                }, 50);
+
                 return fileItemDiv;
             }
 
-            function createPermissionGroup(title, permissions) {
+            // Create permission group detail
+            function createPermissionGroup(title, permissions, type) {
                 const groupDiv = document.createElement('div');
                 groupDiv.className = 'permission-group';
 
@@ -490,6 +648,7 @@ lrwxrwxrwx 1 user group   12 Mar 11 11:30 link.txt -> original.txt
                 const readIcon = document.createElement('span');
                 readIcon.className = permissions[0] === 'r' ? 'check-icon granted' : 'x-icon denied';
                 readIcon.textContent = permissions[0] === 'r' ? '✓' : '✗';
+                readIcon.setAttribute('aria-hidden', 'true');
                 readLi.appendChild(readIcon);
 
                 const readText = document.createElement('span');
@@ -502,6 +661,7 @@ lrwxrwxrwx 1 user group   12 Mar 11 11:30 link.txt -> original.txt
                 const writeIcon = document.createElement('span');
                 writeIcon.className = permissions[1] === 'w' ? 'check-icon granted' : 'x-icon denied';
                 writeIcon.textContent = permissions[1] === 'w' ? '✓' : '✗';
+                writeIcon.setAttribute('aria-hidden', 'true');
                 writeLi.appendChild(writeIcon);
 
                 const writeText = document.createElement('span');
@@ -524,28 +684,27 @@ lrwxrwxrwx 1 user group   12 Mar 11 11:30 link.txt -> original.txt
                     execIcon.className = 'x-icon denied';
                     execIcon.textContent = '✗';
                 }
-
+                execIcon.setAttribute('aria-hidden', 'true');
                 execLi.appendChild(execIcon);
 
                 if (title === 'Owner' && (permissions[2] === 's' || permissions[2] === 'S')) {
                     execText = document.createElement('span');
+                    execText.className = 'special';
                     execText.textContent = 'Execute + SetUID';
                     specialBit = true;
                 } else if (title === 'Group' && (permissions[2] === 's' || permissions[2] === 'S')) {
                     execText = document.createElement('span');
+                    execText.className = 'special';
                     execText.textContent = 'Execute + SetGID';
                     specialBit = true;
                 } else if (title === 'Others' && (permissions[2] === 't' || permissions[2] === 'T')) {
                     execText = document.createElement('span');
+                    execText.className = 'special';
                     execText.textContent = 'Execute + Sticky Bit';
                     specialBit = true;
                 } else {
                     execText = document.createElement('span');
                     execText.textContent = 'Execute';
-                }
-
-                if (specialBit) {
-                    execText.style.color = '#6366f1'; // Indigo color for special bits
                 }
 
                 execLi.appendChild(execText);
@@ -556,6 +715,7 @@ lrwxrwxrwx 1 user group   12 Mar 11 11:30 link.txt -> original.txt
                 return groupDiv;
             }
 
+            // Calculate numeric representation of permissions
             function calculateNumericPermission(ownerPerm, groupPerm, otherPerm) {
                 const calcValue = (perm) => {
                     let value = 0;
@@ -580,6 +740,7 @@ lrwxrwxrwx 1 user group   12 Mar 11 11:30 link.txt -> original.txt
                 }
             }
 
+            // Get file type description
             function getFileTypeDescription(typeChar) {
                 switch (typeChar) {
                     case '-': return 'Regular File';
@@ -592,7 +753,93 @@ lrwxrwxrwx 1 user group   12 Mar 11 11:30 link.txt -> original.txt
                     default: return 'Unknown';
                 }
             }
+
+            // Format file size
+            function formatFileSize(size) {
+                size = parseInt(size);
+                if (isNaN(size)) return '';
+
+                if (size < 1024) {
+                    return `${size} bytes`;
+                } else if (size < 1024 * 1024) {
+                    return `${(size / 1024).toFixed(1)} KB`;
+                } else {
+                    return `${(size / (1024 * 1024)).toFixed(1)} MB`;
+                }
+            }
+
+            // Add keyboard support
+            inputText.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+                    convertBtn.click();
+                }
+            });
+
+            // Focus input on page load
+            inputText.focus();
+
+            // Check if there's any data in URL hash
+            if (window.location.hash) {
+                try {
+                    const decoded = decodeURIComponent(window.location.hash.substring(1));
+                    if (decoded.startsWith('ls=')) {
+                        inputText.value = decoded.substring(3);
+                        convertBtn.click();
+                    }
+                } catch (e) {
+                    console.error("Error parsing URL hash", e);
+                }
+            }
+
+            // Add ability to share results
+            window.shareResults = function () {
+                const text = inputText.value.trim();
+                if (!text) return;
+
+                const encoded = encodeURIComponent('ls=' + text);
+                const url = window.location.href.split('#')[0] + '#' + encoded;
+
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(url)
+                        .then(() => alert('Link copied to clipboard!'))
+                        .catch(() => alert('URL: ' + url));
+                } else {
+                    alert('URL: ' + url);
+                }
+            };
+
+            // Add analytics if needed (commented out for privacy)
+            /*
+            // Only enable if you want analytics
+            (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+            })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+            ga('create', 'UA-XXXXXXXX-X', 'auto');
+            ga('send', 'pageview');
+            */
         });
+    </script>
+
+    <!-- Rich results structured data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Unix File Permission Converter",
+        "description": "Convert Unix file permissions to a human-readable format. Understand ls -l output, chmod numeric values, and special permission bits easily.",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "Any",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+        },
+        "author": {
+            "@type": "Person",
+            "name": "durango"
+        }
+    }
     </script>
 </body>
 
